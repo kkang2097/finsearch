@@ -1,0 +1,3 @@
+[submodule "airflow_feedjobs"]
+	path = airflow_feedjobs
+	url = https://github.com/kkang2097/airflow_feedjobs.git
