@@ -32,13 +32,13 @@ pub struct BraveSearch {
 
 impl BraveSearch {
     async fn brave_search(&self, client: &Client, query: &str) -> Result<BraveSearchResponse,Box<dyn std::error::Error>>{
+
         let mut headers = HeaderMap::new();
         headers.insert("Content-Type", "application/json".parse().unwrap());
         headers.insert("Accept-Encoding", "gzip".parse().unwrap());
         headers.insert("X-Subscription-Token", self.api_key.parse().unwrap());
 
         println!("{:?}", headers);
-        println!("{:?}", &self.api_key);
 
         //TODO: Make sure this part works
         let res = client.post("https://api.search.brave.com/res/v1/web/search?q=".to_string() + &encode(query))
@@ -62,7 +62,7 @@ async fn main() {
     let search_engine: BraveSearch = BraveSearch {
         api_key: env::var("BRAVE_API_KEY").unwrap_or_else(|_| "~/".to_string())
     };
-
+    println!("{:?}", search_engine.api_key);
 
     let raw_string = "Where is Istanbul?";
     let result = search_engine.brave_search(&new_client, "Where is Istanbul?").await; 
