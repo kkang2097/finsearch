@@ -21,23 +21,23 @@ struct OpenAIMessage {
 }
 
 //OpenAI Response Structs
-#[derive(Debug, Deserialize)]
-struct ApiResponse {
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ApiResponse {
     choices: Vec<Choice>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct Choice {
     message: Message,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct Message {
     content: String,
 }
 
 //Brave Search Response structs
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct BraveSearchResponse {
     quality_score: f64,
     rank: u32,
@@ -49,7 +49,7 @@ struct BraveSearchResponse {
     published_at: Option<String>
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct BraveSearchResults {
     results: Vec<BraveSearchResponse>
 }
@@ -66,9 +66,39 @@ pub fn package_openai_response(str_response: String) -> ApiResponse {
     response
 }
 
-pub fn brave_search(client: &Client, query: &str) {
+pub struct BraveSearch {
+    api_key: String
 }
 
+impl BraveSearch {
+    pub fn brave_search(client: &Client, query: &str) {
+        let mut headers = HeaderMap::new();
+        headers.insert("Content-Type", "application/json".parse().unwrap());
+        headers.insert("Authorization", ["Bearer ", &self.api_key].concat().parse().unwrap());
+
+        let messages: Vec<OpenAIMessage> = vec![OpenAIMessage {role: String::from("user"), content: query}];
+        let mut prompt = json!({
+            "messages": messages
+        });
+        prompt.merge(&self.llm_args);
+        
+        println!("{:?}", prompt);
+
+        let res = client.post("https://api.openai.com/v1/chat/completions")
+            .headers(headers)
+            .json(&prompt)
+            .send()
+            .await?;
+
+        if res.status().is_success() {
+            let data: ApiResponse = res.json().await?;
+            let msg_clone = data.choices.get(0).clone().unwrap();
+            let msg_string: String = msg_clone.message.content.clone();
+            return Ok(msg_string);
+        }
+        Err("Error".into())
+    }
+}
 
 impl IO_LLM {
     async fn forward(&self, client: &Client, query: String) -> Result<String, Box<dyn std::error::Error>> {
@@ -94,9 +124,9 @@ impl IO_LLM {
 
         if res.status().is_success() {
             let data: ApiResponse = res.json().await?;
-            let msg_clone: Choice = data.choices.get(0).clone().unwrap();
-            let msg_string: String = msg_clone.message.content;
-            return Ok(msg_clone);
+            let msg_clone = data.choices.get(0).clone().unwrap();
+            let msg_string: String = msg_clone.message.content.clone();
+            return Ok(msg_string);
         }
         Err("Error".into())
     }
