@@ -8,13 +8,13 @@ use json_value_merge::Merge;
 
 
 //Internal structs
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 struct IO_LLM {
     llm_args: Value,
     api_key: String
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 struct OpenAIMessage {
     role: String,
     content: String
@@ -26,12 +26,12 @@ struct ApiResponse {
     choices: Vec<Choice>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 struct Choice {
     message: Message,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 struct Message {
     content: String,
 }
@@ -62,12 +62,11 @@ pub fn package_openai_response(str_response: String) -> ApiResponse {
                 content: str_response
             }
         }]
-    }
+    };
     response
 }
 
-pub fn brave_search(client: &client, query: &str) {
-    Ok()
+pub fn brave_search(client: &Client, query: &str) {
 }
 
 
@@ -95,7 +94,9 @@ impl IO_LLM {
 
         if res.status().is_success() {
             let data: ApiResponse = res.json().await?;
-            return Ok(data.choices[0].message.content);
+            let msg_clone: Choice = data.choices.get(0).clone().unwrap();
+            let msg_string: String = msg_clone.message.content;
+            return Ok(msg_clone);
         }
         Err("Error".into())
     }
@@ -115,7 +116,7 @@ async fn main() {
         api_key: env::var("OPENAI_API_KEY").unwrap_or_else(|_| "~/".to_string())
     };
 
-    let result = llm.forward(new_client,String::from("Where is Istanbul?")).await; 
+    let result = llm.forward(&new_client,String::from("Where is Istanbul?")).await; 
     println!("{:?}", result);
     ()
 }
