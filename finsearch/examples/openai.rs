@@ -4,6 +4,7 @@ use reqwest::header::HeaderMap;
 use serde::{Serialize, Deserialize};
 use serde_json::{json, Value};
 use std::env;
+use dotenv::dotenv;
 use json_value_merge::Merge;
 
 
@@ -134,6 +135,9 @@ impl IO_LLM {
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok();
+
+
     let new_client: Client = reqwest::Client::new();
     
     let llm_args: Value = json!({
