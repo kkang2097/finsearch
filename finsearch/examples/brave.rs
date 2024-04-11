@@ -35,7 +35,7 @@ struct Query {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 struct Web {
-    results: Option<Vec<WebResult>>,
+    results: Vec<WebResult>,
     family_friendly: Option<bool>,
 }
 
@@ -106,22 +106,26 @@ pub struct BraveSearch {
 }
 
 impl BraveSearch {
-    async fn brave_search(&self, client: &Client, query: &str) -> Result<String,Box<dyn std::error::Error>>{
+    async fn brave_search(&self, client: &Client, query: &str) -> Result<Vec<String>,Box<dyn std::error::Error>>{
 
         //TODO: Make sure this part works
-        let res = client.get("https://api.search.brave.com/res/v1/web/search?q=".to_string() + &encode(query))
+            
+        let res = client.get("https://api.search.brave.com/res/v1/web/search")
+            .query(&[("q", query), ("result_filter", "web"), ("safesearch", "strict"), ("count", "5")])
             .header(ACCEPT, "application/json")
-            .header(ACCEPT_ENCODING, "gzip")
+            .header(ACCEPT_ENCODING, "gzip, deflate")
             .header("X-Subscription-Token", &self.api_key)
             .send()
             .await?;
 
-        let data: SearchBundle = res.json().await?;
-        println!("{:?}", data);
+        let data = res.text().await?;
+        let parsed = from_str::<SearchBundle>(&data);
+        let results = &parsed.unwrap().web.unwrap().results;
 
+        //TODO: Map the results into a Vec[String] and return the result  
+        let result_vec: Vec<String> = results.into_iter().map(|x| x.clone().description.unwrap()).collect();
 
-        //TODO: Parse the struct with serde_json and return the result
-        Err("Something".into())
+        Ok(result_vec)
     }
 }
 
@@ -137,30 +141,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("{:?}", search_engine.api_key);
 
     let raw_string = "Where is Istanbul?";
-    // let result = search_engine.brave_search(&new_client, "Where is Istanbul?").await; 
-    
-
-    let api_key = env::var("BRAVE_API_KEY").unwrap_or_else(|_| "~/".to_string());
-
-    //TODO: Make sure this part works
-    
-    let res = new_client.get("https://api.search.brave.com/res/v1/web/search")
-        .query(&[("q", raw_string), ("result_filter", "web"), ("safesearch", "strict"), ("count", "5")])
-        .header(ACCEPT, "application/json")
-        .header(ACCEPT_ENCODING, "gzip, deflate")
-        .header("X-Subscription-Token", api_key)
-        .send()
-        .await?;
-
-    let data = res.text().await?;
-    let parsed = from_str::<SearchBundle>(&data);
-    let results = &parsed.unwrap().web.unwrap().results.unwrap();
-
-    //TODO: Map the results into a Vec[String] and return the result 
-    
+    let result = search_engine.brave_search(&new_client, "Where is Istanbul?").await; 
 
 
-    println!("{:?}", results.get(0).unwrap());
-    println!("{:?}", results.len());
+    println!("{:?}", result.unwrap().get(0));
     Ok(())
 }
