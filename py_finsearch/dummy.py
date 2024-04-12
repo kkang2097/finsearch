@@ -4,14 +4,12 @@ from openai import OpenAI
 
 
 if __name__ == "__main__":
-    client = OpenAI(api_key="NONE", base_url="http://localhost:7878")
+    client = OpenAI(api_key="NONE", base_url="https://alpha---finsearch-l35slsdlnq-uc.a.run.app")
 
     chat_completion = client.chat.completions.create(
-        messages = [
-            {
-                "role": "user",
-                "content": "What's the latest news on Apple M4 chips?"
-            }
+        messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "What is the top news about Gen AI today? "}
         ],
         model = "WHATEVER_MODEL"
     )
