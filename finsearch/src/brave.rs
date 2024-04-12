@@ -106,7 +106,7 @@ pub struct BraveSearch {
 }
 
 impl BraveSearch {
-    async fn brave_search(&self, client: &Client, query: &str) -> Result<Vec<String>,Box<dyn std::error::Error>>{
+    pub async fn brave_search(&self, client: &Client, query: &str) -> Result<Vec<String>,Box<dyn std::error::Error>>{
 
         //TODO: Make sure this part works
             
