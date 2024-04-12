@@ -10,9 +10,14 @@ For example, look at this (result)[https://github.com/kayvane1/brave-api/tree/st
 - Set up Axum things like tracing, app state, etc
 - added a little bit of RAG (Brave Search + OpenAI synthesizer)
 
-### V2 (doing)
+### V2 (done)
 - Dockerize Image, Push to GCP
+
+### V3
 - FreshEval
 
+### V4
+- Docker multi-stage build (20x smaller Docker image)
+- Decouple code, multi-threaded server
 
 
