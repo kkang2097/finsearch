@@ -27,19 +27,19 @@ use crate::brave::BraveSearch;
 
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 struct ChatMessage {
     role: String,
     content: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 struct ChatCompletionRequest {
     model: String,
     messages: Vec<ChatMessage>,
 }
 
-#[derive(Serialize)]
+#[derive(Clone, Serialize, Deserialize)]
 struct ChatCompletionResponse {
     id: String,
     object: String,
@@ -53,24 +53,40 @@ async fn chat_completions(State(state): State<AppState>, Json(request): Json<Cha
     
     //Packages the response here
     let resp_content = if let Some(last_message) = request.messages.last() {
-        if last_message.role == "user" {
-            //TODO: Do some simple RAG here
+        if true {
             let msg = request.messages.last().unwrap().content.clone();
+            //TODO: Fuse the messages into a single string using map()
+            let result_vec: Vec<String> = request.messages.into_iter().map(|x| {
+                                                                           let clone = x.clone();
+                                                                           format!(
+                                                                               "
+                                                                                --------------------------------------------
+                                                                                    {}: {}
+                                                                                --------------------------------------------
+                                                                               
+                                                                                ", clone.role, clone.content
+                                                                               )
+                                                                            }
+                                                                           ).collect(); 
+            let msg_bulk = "Here is a sequence of messages: \n".to_string() + &result_vec.join("\n");
+            //TODO: RAG 
             let brave_results = state.search_engine.brave_search(&state.client, &msg).await.unwrap().join("\n");
             let rag_query = format!(
                 "
-                    Here is the original query:
+                    Here is the original message sequence:
                     {}
 
                     I used a search engine to pull relevant results. Here are some potentially useful fact snippets:
                     {}
 
 
-                    Using the fact snippets and prior knowledge given above, answer the original query to the best of your knowledge.
+                    Using the fact snippets and prior knowledge given above, answer the original message sequence to the best of your knowledge.
+                    Output should be in STRING format and not return the original message sequence.
                 ",
-                &msg,
+                &msg_bulk,
                 &brave_results
                 );
+
             let synthesized = state.llm.forward(&state.client, rag_query.to_string()).await;
             synthesized
         } else {
@@ -122,7 +138,7 @@ async fn main() {
         llm: IO_LLM {
             api_key: env::var("OPENAI_API_KEY").unwrap_or_else(|_| "~/".to_string()),
             llm_args: json!({
-                "model": "gpt-4-turbo",
+                "model": "gpt-3.5-turbo",
                 "temperature": 0.1
             })
         },
@@ -140,6 +156,7 @@ async fn main() {
         .layer(TraceLayer::new_for_http())
         .layer(cors)
         .with_state(app_state);
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:7878").await.unwrap();
+    let port = std::env::var("PORT").unwrap_or_else(|_| "7878".to_string());
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", port)).await.unwrap();
     serve(listener, app).await.unwrap();
 }
