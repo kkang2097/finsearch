@@ -10,7 +10,7 @@ if __name__ == "__main__":
         messages = [
             {
                 "role": "user",
-                "content": "Say this is a test"
+                "content": "What's the latest news on Apple M4 chips?"
             }
         ],
         model = "WHATEVER_MODEL"
