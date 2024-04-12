@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use reqwest::Client;
 use reqwest::header::HeaderMap;
 use serde::{Serialize, Deserialize};
@@ -37,24 +36,6 @@ struct Message {
     content: String,
 }
 
-//Brave Search Response structs
-#[derive(Clone, Debug, Serialize, Deserialize)]
-struct BraveSearchResponse {
-    quality_score: f64,
-    rank: u32,
-    title: String,
-    url: String,
-    snippet: String,
-    thumbnail: Option<String>,
-    source: String,
-    published_at: Option<String>
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-struct BraveSearchResults {
-    results: Vec<BraveSearchResponse>
-}
-
 pub fn package_openai_response(str_response: String) -> ApiResponse {
     //TODO: Package a string response into an ApiResponse
     let response: ApiResponse = ApiResponse {
@@ -65,10 +46,6 @@ pub fn package_openai_response(str_response: String) -> ApiResponse {
         }]
     };
     response
-}
-
-pub struct BraveSearch {
-    api_key: String
 }
 
 impl IO_LLM {

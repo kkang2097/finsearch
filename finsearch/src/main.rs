@@ -1,28 +1,23 @@
 use axum::{
     extract::State,
-    http::{StatusCode, Request, Response},
     response::{IntoResponse, Json},
     routing::post,
-    middleware::{Next, from_fn},
     Router,
     serve
 };
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use std::time::{SystemTime, UNIX_EPOCH};
 use tower_http::{
     cors::{Any, CorsLayer},
     trace::TraceLayer
 };
 use std::env;
-use serde_json::{json, Value};
+use serde_json::{json};
 use dotenv::dotenv;
-use std::sync::Arc;
 pub mod openai;
 pub mod brave;
 use crate::openai::IO_LLM;
-use crate::brave::BraveSearch;
 
 
 
@@ -52,7 +47,7 @@ struct ChatCompletionResponse {
 async fn chat_completions(State(state): State<AppState>, Json(request): Json<ChatCompletionRequest>) -> impl IntoResponse {
     
     //Packages the response here
-    let resp_content = if let Some(last_message) = request.messages.last() {
+    let resp_content = if let Some(_last_message) = request.messages.last() {
         if true {
             let msg = request.messages.last().unwrap().content.clone();
             //TODO: Fuse the messages into a single string using map()

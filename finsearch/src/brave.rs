@@ -1,10 +1,9 @@
 use reqwest::Client;
 use reqwest::header::{ACCEPT, ACCEPT_ENCODING};
 use serde::{Serialize, Deserialize};
-use serde_json::{json, Value, from_str};
+use serde_json::{ Value, from_str};
 use std::env;
 use dotenv::dotenv;
-use urlencoding::encode;
 
 //Brave SearchResponse structs, got this from Perplexity Pro 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -139,8 +138,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         api_key: env::var("BRAVE_API_KEY").unwrap_or_else(|_| "~/".to_string())
     };
     println!("{:?}", search_engine.api_key);
-
-    let raw_string = "Where is Istanbul?";
     let result = search_engine.brave_search(&new_client, "Where is Istanbul?").await; 
 
 
