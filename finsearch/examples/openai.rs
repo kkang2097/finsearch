@@ -10,9 +10,9 @@ use json_value_merge::Merge;
 
 //Internal structs
 #[derive(Clone, Serialize, Deserialize)]
-struct IO_LLM {
-    llm_args: Value,
-    api_key: String
+pub struct IO_LLM {
+    pub llm_args: Value,
+    pub api_key: String
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -71,38 +71,8 @@ pub struct BraveSearch {
     api_key: String
 }
 
-impl BraveSearch {
-    pub fn brave_search(client: &Client, query: &str) {
-        let mut headers = HeaderMap::new();
-        headers.insert("Content-Type", "application/json".parse().unwrap());
-        headers.insert("Authorization", ["Bearer ", &self.api_key].concat().parse().unwrap());
-
-        let messages: Vec<OpenAIMessage> = vec![OpenAIMessage {role: String::from("user"), content: query}];
-        let mut prompt = json!({
-            "messages": messages
-        });
-        prompt.merge(&self.llm_args);
-        
-        println!("{:?}", prompt);
-
-        let res = client.post("https://api.openai.com/v1/chat/completions")
-            .headers(headers)
-            .json(&prompt)
-            .send()
-            .await?;
-
-        if res.status().is_success() {
-            let data: ApiResponse = res.json().await?;
-            let msg_clone = data.choices.get(0).clone().unwrap();
-            let msg_string: String = msg_clone.message.content.clone();
-            return Ok(msg_string);
-        }
-        Err("Error".into())
-    }
-}
-
 impl IO_LLM {
-    async fn forward(&self, client: &Client, query: String) -> Result<String, Box<dyn std::error::Error>> {
+    pub async fn forward(&self, client: &Client, query: String) -> Result<String, Box<dyn std::error::Error>> {
         //let response = reqwest::get()
         
         let mut headers = HeaderMap::new();

@@ -102,7 +102,7 @@ struct MainElement {
 //Brave Search structs
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BraveSearch {
-    api_key: String
+    pub api_key: String
 }
 
 impl BraveSearch {
