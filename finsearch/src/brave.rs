@@ -110,7 +110,7 @@ impl BraveSearch {
         //TODO: Make sure this part works
             
         let res = client.get("https://api.search.brave.com/res/v1/web/search")
-            .query(&[("q", query), ("result_filter", "web"), ("safesearch", "strict"), ("count", "5")])
+            .query(&[("q", query), ("result_filter", "web"), ("safesearch", "strict"), ("count", "20")])
             .header(ACCEPT, "application/json")
             .header(ACCEPT_ENCODING, "gzip, deflate")
             .header("X-Subscription-Token", &self.api_key)
