@@ -1,0 +1,5 @@
+docker build -t us-central1-docker.pkg.dev/search-and-recommend/finsearch-api/finsearch:v46 .
+
+
+# Gcloud Docker authentication to push images to Artifact Repo
+docker login -u oauth2accesstoken -p "$(gcloud auth print-access-token)" us-central1-docker.pkg.dev
