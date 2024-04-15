@@ -24,14 +24,16 @@ For example, look at this (result)[https://github.com/kayvane1/brave-api/tree/st
 ### V2 (done)
 - Dockerize Image, Push to GCP
 
-### V3
+### V3 (done)
 - ~~FreshEval~~
 FreshEval actually relies on function calling, so it'll need some tweaks to work on the vanilla /chat/completions endpoint
+- Made my own eval Jupyter Notebook and ran ROUGE metrics
+
 ### V4
 - Docker multi-stage build (20x smaller Docker image)
 - Decouple code, multi-threaded server
 
-###V5
+### V5
 - automatic parallelism of RAG chains, which involves optimizing the computation graph
 
 ## Some observations about AI-assisted coding
